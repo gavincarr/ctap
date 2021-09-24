@@ -1,0 +1,6 @@
+1..14
+not ok - csv is NOT regular
+ok - header is as expected
+ok - row_count >= 100 (125)
+ok - columns.a.fill_rate == 100
+ok - columns.b.fill_rate >= 33 (34.33)

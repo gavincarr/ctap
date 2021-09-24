@@ -1,0 +1,8 @@
+1..14
+not ok 1 - csv is NOT regular
+ok 2 - header is as expected
+ok - row_count >= 100 (125)
+ok - columns.a.fill_rate == 100
+ok 5 - columns.b.fill_rate >= 33 (34.33)
+ok 6 - columns.c.fill_rate >= 75 (75.73)
+Bail out! Nuclear reactor imploded.

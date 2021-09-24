@@ -1,0 +1,22 @@
+1..14
+#
+# Testing file test1.csv
+#
+ok
+ok 2
+ok - row_count >= 100 (125)
+ok 4 - columns.a.fill_rate == 100
+not ok 5 - columns.b.fill_rate >= 35 (34.33)
+#   Failed test 'columns.b.fill_rate >= 35 (34.33)'
+#   at /usr/bin/bin/csv_check line 132.
+not ok 6 - columns.c.fill_rate >= 80 (75.73)
+#   Failed test 'columns.c.fill_rate >= 80 (75.73)'
+#   at /usr/bin/csv_check line 132.
+ok 7 - columns.d.fill_rate >= 99 (100.00)
+ok 8 - columns.e.fill_rate >= 99 (100.00)
+ok 9 - columns.f.fill_rate >= 98 (99.37)
+ok 10 - columns.g.fill_rate >= 98 (99.37)
+ok 11 - columns.h.fill_rate >= 95 (98.88)
+ok 12 - columns.i.fill_rate >= 98 (99.37)
+ok 13 - columns.j.fill_rate >= 80 (83.30)
+ok 14 - columns.k.fill_rate >= 95 (96.03)
