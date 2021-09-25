@@ -1,0 +1,47 @@
+before:
+  hooks:
+    - go mod download
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    name_template: '{{ .ProjectName }}-{{ replace .Version "v" "" }}-{{ .Os }}_{{ .Arch }}'
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  - id: nfpms
+    description: ctap is a lightweight, portable TAP-output colouriser
+    maintainer: Gavin Carr <gavin@openfusion.com.au>
+    license: MIT
+    formats: 
+      - deb
+      - rpm
+    file_name_template: '{{ .ProjectName }}_{{ replace .Version "v" "" }}_{{ .Arch }}'  
+    overrides:
+      rpm:
+        file_name_template: '{{ .ProjectName }}-{{ replace .Version "v" "" }}.{{ .Arch }}'
+release:
+  github:
+    owner: gavincarr
+    name: ctap
+env_files:
+  github_token: ~/.gh_goreleaser
