@@ -7,11 +7,11 @@ colouriser, written in Go.
 
 It turns boring old TAP output:
 
-![Boring TAP output](/screenshots/test2.jpg?raw=true)
+![Boring TAP output](/screenshots/test2.png?raw=true)
 
 into snazzy, easily-scannable output:
 
-![Snazzy, scannable TAP output](/screenshots/test2c.jpg?raw=true)
+![Snazzy, scannable TAP output](/screenshots/test2c.png?raw=true)
 
 and returns non-zero exit codes on failures.
 
