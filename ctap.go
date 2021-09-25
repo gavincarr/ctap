@@ -185,6 +185,9 @@ func run(opts Options, ofh io.Writer) int {
 			case NOK:
 				failures = append(failures, testnum)
 				redb.Println(text)
+				if exitCode < TestFailExitCode {
+					exitCode = TestFailExitCode
+				}
 			default:
 				log.Fatal("unhandled status: " + text)
 			}
@@ -192,14 +195,16 @@ func run(opts Options, ofh io.Writer) int {
 			gray2.Println(text)
 		case Bail:
 			yellow.Println(text)
-			exitCode = BailExitCode
+			if exitCode < BailExitCode {
+				exitCode = BailExitCode
+			}
 		default:
 			fmt.Printf("[%s] %s\n", line.Type.String(), text)
 		}
 	}
 
 	badPlan := planLast > 0 && testnum != planLast
-	if badPlan && exitCode == 0 {
+	if badPlan && exitCode < PlanFailExitCode {
 		exitCode = PlanFailExitCode
 	}
 
@@ -215,9 +220,6 @@ func run(opts Options, ofh io.Writer) int {
 			redb.Printf("Failed %d/%d tests, %0.02f%% ok \u2717\n",
 				len(failures), testnum,
 				float64(testnum-len(failures))*100/float64(testnum))
-			if exitCode == 0 {
-				exitCode = TestFailExitCode
-			}
 		} else if !badPlan {
 			greenb.Printf("Passed %d/%d tests, 100%% ok \u2713\n", testnum, testnum)
 		}

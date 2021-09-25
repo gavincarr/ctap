@@ -1,0 +1,15 @@
+[32mok 1 - csv is regular[0m
+[32mok 2 - header is as expected[0m
+[32mok - row_count >= 100 (125)[0m
+[32mok 4 - columns.a.fill_rate == 100[0m
+[32mok 5 - columns.b.fill_rate >= 33 (34.33)[0m
+[32mok 6 - columns.c.fill_rate >= 75 (75.73)[0m
+[32mok 7 - columns.d.fill_rate >= 99 (100.00)[0m
+[32mok 8 - columns.e.fill_rate >= 99 (100.00)[0m
+[32mok 9 - columns.f.fill_rate >= 98 (99.37)[0m
+[32mok 10 - columns.g.fill_rate >= 98 (99.37)[0m
+[32mok 11 - columns.h.fill_rate >= 95 (98.88)[0m
+[32mok 12 - columns.i.fill_rate >= 98 (99.37)[0m
+[32mok 13 - columns.j.fill_rate >= 80 (83.30)[0m
+[32mok 14 - columns.k.fill_rate >= 95 (96.03)[0m
+[38;2;153;153;153m1..14[0m
