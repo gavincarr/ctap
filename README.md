@@ -20,7 +20,7 @@ Installation
 ------------
 
 Binary packages are available from the
-[Releases page](/gavincarr/ctap/releases/latest/).
+[Releases page](/releases/latest/).
 
 Or if you have go installed, you can do:
 
