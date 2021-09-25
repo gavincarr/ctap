@@ -19,7 +19,10 @@ and returns non-zero exit codes on failures.
 Installation
 ------------
 
-If you have go installed, you can do:
+Binary packages are available from the
+(Releases page)[/gavincarr/ctap/releases/latest/].
+
+Or if you have go installed, you can do:
 
     go install github.com/gavincarr/ctap@latest
 
