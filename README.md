@@ -2,8 +2,9 @@
 ctap
 ====
 
-[![GoReportCard example](https://goreportcard.com/badge/github.com/gavincarr/ctap)](https://goreportcard.com/report/github.com/gavincarr/ctap)
+[![GoReportCard](https://goreportcard.com/badge/github.com/gavincarr/ctap)](https://goreportcard.com/report/github.com/gavincarr/ctap)
 [![GitHub license](https://badgen.net/github/license/gavincarr/ctap)](https://github.com/gavincarr/ctap/blob/master/LICENSE)
+![Build Status](https://github.com/gavincarr/ctap/actions/workflows/test.yml/badge.svg)
 
 ctap is a lightweight, portable [TAP-output](http://testanything.org/)
 colouriser, written in Go.

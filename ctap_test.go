@@ -98,9 +98,9 @@ func TestBasic(t *testing.T) {
 			t.Fatalf("%s: %s", err.Error(), string(exp))
 		}
 		if runtime.GOOS == "windows" {
-			// On Windows, try munging our expected line endings
-			got = reNL.ReplaceAll(exp, []byte("\r\n"))
-			exp = reNL.ReplaceAll(exp, []byte("\r\n"))
+			// For Windows tests, normalise line endings
+			got = reNL.ReplaceAll(exp, []byte("\n"))
+			exp = reNL.ReplaceAll(exp, []byte("\n"))
 		}
 		if !bytes.Equal(got, exp) {
 			t.Errorf("test %q failed:\n%s\n", tc.name,
