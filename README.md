@@ -3,7 +3,6 @@ ctap
 ====
 
 [![GoReportCard](https://goreportcard.com/badge/github.com/gavincarr/ctap)](https://goreportcard.com/report/github.com/gavincarr/ctap)
-![Build Status](https://github.com/gavincarr/ctap/actions/workflows/test.yml/badge.svg)
 [![Build Status](https://github.com/gavincarr/ctap/actions/workflows/test.yml/badge.svg)](https://github.com/gavincarr/ctap/actions?query=workflow%3Atest)
 [![GitHub license](https://badgen.net/github/license/gavincarr/ctap)](https://github.com/gavincarr/ctap/blob/master/LICENSE)
 
