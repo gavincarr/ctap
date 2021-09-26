@@ -236,6 +236,8 @@ func run(opts options, ofh io.Writer) int {
 
 	// Setup colours
 	color.SetOutput(ofh)
+	// Force colours, even for non-tty outputs (?)
+	color.ForceOpenColor()
 	cmap := getColourMap(opts)
 
 	// Process input
