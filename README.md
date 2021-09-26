@@ -11,7 +11,7 @@ It turns boring old TAP output:
 
 into snazzy, easily-scannable output:
 
-![Snazzy, scannable TAP output](/screenshots/test2c.png?raw=true)
+![Snazzy, scannable TAP output](/screenshots/test2gs.png?raw=true)
 
 and returns non-zero exit codes on failures.
 
@@ -49,11 +49,11 @@ Usage
 Todo
 ----
 
-- add `-f` option to show failures (suppress successes from TAP output)
-- add `-g` option to use glyphs instead of 'ok/not ok' in TAP output
-- add options to specify custom colours (`-POFDB`)
-- add config file support for standard options/colours
-- add other renderers to transmute TAP output (e.g. 'dots') (?)
+- [x] add `-f` option to show failures (suppress successes from TAP output)
+- [x] add `-g` option to use glyphs instead of 'ok/not ok' in TAP output
+- [ ] add options to specify custom colours (`-POFDB`?)
+- [ ] add config file support for standard options/colours
+- [ ] add other renderers to transmute TAP output (e.g. 'dots') (?)
 
 
 Author
