@@ -236,8 +236,10 @@ func run(opts options, ofh io.Writer) int {
 
 	// Setup colours
 	color.SetOutput(ofh)
-	// Force colours, even for non-tty outputs (?)
-	color.ForceOpenColor()
+	// Force colours in CI environments
+	if _, ok := os.LookupEnv("CI"); ok {
+		color.ForceOpenColor()
+	}
 	cmap := getColourMap(opts)
 
 	// Process input
