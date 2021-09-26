@@ -64,7 +64,7 @@ func TestBasic(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		opts := Options{}
+		opts := options{}
 		if strings.Contains(tc.flags, "f") {
 			opts.Failures = true
 		}

@@ -19,15 +19,15 @@ import (
 )
 
 const (
-	TestFailExitCode = 3
-	PlanFailExitCode = 4
-	BailExitCode     = 5
+	testFailExitCode = 3
+	planFailExitCode = 4
+	bailExitCode     = 5
 
-	GlyphOK  = "\u2713"
-	GlyphNOK = "\u2717"
+	glyphOK  = "\u2713"
+	glyphNOK = "\u2717"
 )
 
-type Options struct {
+type options struct {
 	Failures bool `short:"f" long:"failures" description:"show test failures (suppress TAP successes)"`
 	Glyphs   bool `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output"`
 	Summary  bool `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results"`
@@ -36,7 +36,7 @@ type Options struct {
 	} `positional-args:"yes"`
 }
 
-var opts Options
+var opts options
 
 var (
 	reVersion    = regexp.MustCompile(`^TAP version (\d+)`)
@@ -48,29 +48,29 @@ var (
 	reTestPrefix = regexp.MustCompile(`^(ok|not ok)\pZ*`)
 )
 
-type LineType int
+type lineType int
 
 const (
-	Unknown LineType = iota
-	Version
-	Plan
-	TestOK
-	TestNOK
-	Diagnostic
-	Bail
-	SummaryOK
-	SummaryNOK
-	PlanNOK
+	tapUnknown lineType = iota
+	tapVersion
+	tapPlan
+	tapTestOK
+	tapTestNOK
+	tapDiagnostic
+	tapBail
+	tapSummaryOK
+	tapSummaryNOK
+	tapPlanNOK
 )
 
-func (t LineType) String() string {
+func (t lineType) String() string {
 	return [...]string{
 		"Unknown", "Version", "Plan", "TestOK", "TestNOK",
 		"Diag", "Bail", "SummaryOK", "SummaryNOK", "PlanNOK"}[t]
 }
 
-type Line struct {
-	Type        LineType
+type lineRecord struct {
+	Type        lineType
 	PlanFirst   int // Plan
 	PlanLast    int // Plan
 	TestNum     int // Test
@@ -78,28 +78,28 @@ type Line struct {
 	Directive   string
 }
 
-type ColourMap map[LineType]color.PrinterFace
+type colourMap map[lineType]color.PrinterFace
 
-func colourMap(opt Options) ColourMap {
-	cmap := make(ColourMap)
-	cmap[Version] = color.New(color.FgCyan)
-	cmap[Plan] = color.HEX("#999999")
-	cmap[TestOK] = color.New(color.FgGreen)
-	cmap[TestNOK] = color.New(color.FgRed, color.OpBold)
-	cmap[Diagnostic] = color.HEX("#666666")
-	cmap[Bail] = color.New(color.FgYellow, color.OpBold)
-	cmap[SummaryOK] = color.New(color.FgGreen, color.OpBold)
-	cmap[SummaryNOK] = color.New(color.FgRed, color.OpBold)
-	cmap[PlanNOK] = color.New(color.FgMagenta, color.Bold)
+func getColourMap(opt options) colourMap {
+	cmap := make(colourMap)
+	cmap[tapVersion] = color.New(color.FgCyan)
+	cmap[tapPlan] = color.HEX("#999999")
+	cmap[tapTestOK] = color.New(color.FgGreen)
+	cmap[tapTestNOK] = color.New(color.FgRed, color.OpBold)
+	cmap[tapDiagnostic] = color.HEX("#666666")
+	cmap[tapBail] = color.New(color.FgYellow, color.OpBold)
+	cmap[tapSummaryOK] = color.New(color.FgGreen, color.OpBold)
+	cmap[tapSummaryNOK] = color.New(color.FgRed, color.OpBold)
+	cmap[tapPlanNOK] = color.New(color.FgMagenta, color.Bold)
 	return cmap
 }
 
-func parseLine(line string) Line {
-	if matches := reVersion.FindStringSubmatch(line); matches != nil {
-		return Line{Type: Version}
+func parseLine(text string) lineRecord {
+	if matches := reVersion.FindStringSubmatch(text); matches != nil {
+		return lineRecord{Type: tapVersion}
 	}
-	if matches := rePlan.FindStringSubmatch(line); matches != nil {
-		line := Line{Type: Plan}
+	if matches := rePlan.FindStringSubmatch(text); matches != nil {
+		line := lineRecord{Type: tapPlan}
 		if planfirst := matches[1]; planfirst != "" {
 			if i, err := strconv.Atoi(planfirst); err == nil {
 				line.PlanFirst = i
@@ -112,8 +112,8 @@ func parseLine(line string) Line {
 		}
 		return line
 	}
-	if matches := reTest.FindStringSubmatch(line); matches != nil {
-		line := Line{}
+	if matches := reTest.FindStringSubmatch(text); matches != nil {
+		line := lineRecord{}
 		res := matches[1]
 		if testno := matches[2]; testno != "" {
 			i, err := strconv.Atoi(testno)
@@ -123,19 +123,19 @@ func parseLine(line string) Line {
 		}
 		switch res {
 		case "ok":
-			line.Type = TestOK
+			line.Type = tapTestOK
 		case "not ok":
-			line.Type = TestNOK
+			line.Type = tapTestNOK
 		}
 		return line
 	}
-	if matches := reDiagnostic.FindStringSubmatch(line); matches != nil {
-		return Line{Type: Diagnostic}
+	if matches := reDiagnostic.FindStringSubmatch(text); matches != nil {
+		return lineRecord{Type: tapDiagnostic}
 	}
-	if matches := reBail.FindStringSubmatch(line); matches != nil {
-		return Line{Type: Bail}
+	if matches := reBail.FindStringSubmatch(text); matches != nil {
+		return lineRecord{Type: tapBail}
 	}
-	return Line{Type: Unknown}
+	return lineRecord{Type: tapUnknown}
 }
 
 func failureString(failures []int) string {
@@ -150,25 +150,25 @@ func failureString(failures []int) string {
 	return sb.String()
 }
 
-func cprintln(text string, linetype LineType, cmap ColourMap, opts Options) {
-	if opts.Failures && linetype == TestOK {
+func cprintln(text string, linetype lineType, cmap colourMap, opts options) {
+	if opts.Failures && linetype == tapTestOK {
 		return
 	}
 	if opts.Glyphs {
 		// Replace `ok/not ok` (or prepend) glyphs
 		switch linetype {
-		case TestOK:
-			text = reTestPrefix.ReplaceAllString(text, GlyphOK+" ")
-		case TestNOK:
-			text = reTestPrefix.ReplaceAllString(text, GlyphNOK+" ")
-		case Bail:
-			text = GlyphNOK + " " + text
+		case tapTestOK:
+			text = reTestPrefix.ReplaceAllString(text, glyphOK+" ")
+		case tapTestNOK:
+			text = reTestPrefix.ReplaceAllString(text, glyphNOK+" ")
+		case tapBail:
+			text = glyphNOK + " " + text
 		}
 	}
 	cmap[linetype].Println(text)
 }
 
-func run(opts Options, ofh io.Writer) int {
+func run(opts options, ofh io.Writer) int {
 	// Setup
 	log.SetFlags(0)
 	var fh *os.File
@@ -186,7 +186,7 @@ func run(opts Options, ofh io.Writer) int {
 
 	// Setup colours
 	color.SetOutput(ofh)
-	cmap := colourMap(opts)
+	cmap := getColourMap(opts)
 
 	// Process input
 	var planLast int
@@ -200,38 +200,38 @@ func run(opts Options, ofh io.Writer) int {
 		cprintln(text, line.Type, cmap, opts)
 
 		switch line.Type {
-		case Plan:
+		case tapPlan:
 			planLast = line.PlanLast
-		case TestOK, TestNOK:
+		case tapTestOK, tapTestNOK:
 			if line.TestNum > 0 {
 				testnum = line.TestNum
 			} else {
 				testnum++
 			}
-			if line.Type == TestNOK {
+			if line.Type == tapTestNOK {
 				failures = append(failures, testnum)
-				if exitCode < TestFailExitCode {
-					exitCode = TestFailExitCode
+				if exitCode < testFailExitCode {
+					exitCode = testFailExitCode
 				}
 			}
-		case Bail:
-			if exitCode < BailExitCode {
-				exitCode = BailExitCode
+		case tapBail:
+			if exitCode < bailExitCode {
+				exitCode = bailExitCode
 			}
 		}
 	}
 
 	planNOK := planLast > 0 && testnum != planLast
-	if planNOK && exitCode < PlanFailExitCode {
-		exitCode = PlanFailExitCode
+	if planNOK && exitCode < planFailExitCode {
+		exitCode = planFailExitCode
 	}
 
 	glyph := ""
 	if opts.Glyphs {
 		if planNOK || len(failures) > 0 {
-			glyph = GlyphNOK + " "
+			glyph = glyphNOK + " "
 		} else {
-			glyph = GlyphOK + " "
+			glyph = glyphOK + " "
 		}
 	}
 
@@ -241,21 +241,21 @@ func run(opts Options, ofh io.Writer) int {
 			if len(failures) > 1 {
 				plural = "s"
 			}
-			cmap[SummaryNOK].Printf("%sFAILED test%s: %s\n",
+			cmap[tapSummaryNOK].Printf("%sFAILED test%s: %s\n",
 				glyph, plural,
 				failureString(failures))
-			cmap[SummaryNOK].Printf("%sFailed %d/%d tests, %0.02f%% ok\n",
+			cmap[tapSummaryNOK].Printf("%sFailed %d/%d tests, %0.02f%% ok\n",
 				glyph, len(failures), testnum,
 				float64(testnum-len(failures))*100/float64(testnum))
 		} else if !planNOK {
-			cmap[SummaryOK].Printf("%sPassed %d/%d tests, 100%% ok\n",
+			cmap[tapSummaryOK].Printf("%sPassed %d/%d tests, 100%% ok\n",
 				glyph, testnum, testnum)
 		}
 	}
 
 	// Fail if we haven't seen all planned tests
 	if planNOK {
-		cmap[PlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
+		cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
 			glyph, testnum, planLast)
 	}
 
