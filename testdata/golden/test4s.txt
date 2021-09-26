@@ -5,6 +5,6 @@
 [32mok - columns.a.fill_rate == 100[0m
 [32mok - columns.b.fill_rate >= 33 (34.33)[0m
 [31;1mFAILED test: 1
-[0m[31;1mFailed 1/5 tests, 80.00% ok ✗
+[0m[31;1mFailed 1/5 tests, 80.00% ok
 [0m[35;1mFailed plan: only 5/14 planned tests seen
 [0m

@@ -6,6 +6,6 @@
 [32mok 5 - columns.b.fill_rate >= 33 (34.33)[0m
 [32mok 6 - columns.c.fill_rate >= 75 (75.73)[0m
 [31;1mFAILED test: 1
-[0m[31;1mFailed 1/6 tests, 83.33% ok ✗
+[0m[31;1mFailed 1/6 tests, 83.33% ok
 [0m[35;1mFailed plan: only 6/14 planned tests seen
 [0m

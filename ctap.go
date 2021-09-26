@@ -48,31 +48,43 @@ const (
 	Unknown LineType = iota
 	Version
 	Plan
-	Test
+	TestOK
+	TestNOK
 	Diagnostic
 	Bail
+	SummaryOK
+	SummaryNOK
+	PlanNOK
 )
 
 func (t LineType) String() string {
-	return [...]string{"Unkn", "Vers", "Plan", "Test", "Diag", "Bail"}[t]
+	return [...]string{
+		"Unknown", "Version", "Plan", "TestOK", "TestNOK",
+		"Diag", "Bail", "SummaryOK", "SummaryNOK", "PlanNOK"}[t]
 }
-
-type StatusType int
-
-const (
-	Unset StatusType = iota
-	OK
-	NOK
-)
 
 type Line struct {
 	Type        LineType
-	PlanFirst   int        // Plan
-	PlanLast    int        // Plan
-	Status      StatusType // Test
-	TestNum     int        // Test
+	PlanFirst   int // Plan
+	PlanLast    int // Plan
+	TestNum     int // Test
 	Description string
 	Directive   string
+}
+
+type ColourMap map[LineType]color.PrinterFace
+
+func colourMap(opt Options) ColourMap {
+	cmap := make(ColourMap)
+	cmap[Plan] = color.HEX("#999999")
+	cmap[TestOK] = color.New(color.FgGreen)
+	cmap[TestNOK] = color.New(color.FgRed, color.OpBold)
+	cmap[Diagnostic] = color.HEX("#666666")
+	cmap[Bail] = color.New(color.FgYellow, color.OpBold)
+	cmap[SummaryOK] = color.New(color.FgGreen, color.OpBold)
+	cmap[SummaryNOK] = color.New(color.FgRed, color.OpBold)
+	cmap[PlanNOK] = color.New(color.FgMagenta, color.Bold)
+	return cmap
 }
 
 func parseLine(line string) Line {
@@ -94,7 +106,7 @@ func parseLine(line string) Line {
 		return line
 	}
 	if matches := reTest.FindStringSubmatch(line); matches != nil {
-		line := Line{Type: Test}
+		line := Line{}
 		res := matches[1]
 		if testno := matches[2]; testno != "" {
 			i, err := strconv.Atoi(testno)
@@ -104,9 +116,9 @@ func parseLine(line string) Line {
 		}
 		switch res {
 		case "ok":
-			line.Status = OK
+			line.Type = TestOK
 		case "not ok":
-			line.Status = NOK
+			line.Type = TestNOK
 		}
 		return line
 	}
@@ -131,6 +143,10 @@ func failureString(failures []int) string {
 	return sb.String()
 }
 
+func cprintln(text string, linetype LineType, cmap ColourMap, opts Options) {
+	cmap[linetype].Println(text)
+}
+
 func run(opts Options, ofh io.Writer) int {
 	// Setup
 	log.SetFlags(0)
@@ -149,17 +165,9 @@ func run(opts Options, ofh io.Writer) int {
 
 	// Setup colours
 	color.SetOutput(ofh)
-	//red := color.New(color.FgRed)
-	redb := color.New(color.FgRed, color.OpBold)
-	green := color.New(color.FgGreen)
-	greenb := color.New(color.FgGreen, color.OpBold)
-	yellow := color.New(color.FgYellow, color.OpBold)
-	//cyan := color.New(color.FgCyan, color.OpBold)
-	//def := color.New(color.FgDefault)
-	gray1 := color.HEX("#999999")
-	gray2 := color.HEX("#666666")
-	magentab := color.New(color.FgMagenta, color.Bold)
+	cmap := colourMap(opts)
 
+	// Process input
 	var planLast int
 	testnum := 0
 	failures := []int{}
@@ -168,43 +176,32 @@ func run(opts Options, ofh io.Writer) int {
 		text := scanner.Text()
 
 		line := parseLine(text)
+		cprintln(text, line.Type, cmap, opts)
 
 		switch line.Type {
 		case Plan:
 			planLast = line.PlanLast
-			gray1.Println(text)
-		case Test:
+		case TestOK, TestNOK:
 			if line.TestNum > 0 {
 				testnum = line.TestNum
 			} else {
 				testnum++
 			}
-			switch line.Status {
-			case OK:
-				green.Println(text)
-			case NOK:
+			if line.Type == TestNOK {
 				failures = append(failures, testnum)
-				redb.Println(text)
 				if exitCode < TestFailExitCode {
 					exitCode = TestFailExitCode
 				}
-			default:
-				log.Fatal("unhandled status: " + text)
 			}
-		case Diagnostic:
-			gray2.Println(text)
 		case Bail:
-			yellow.Println(text)
 			if exitCode < BailExitCode {
 				exitCode = BailExitCode
 			}
-		default:
-			fmt.Printf("[%s] %s\n", line.Type.String(), text)
 		}
 	}
 
-	badPlan := planLast > 0 && testnum != planLast
-	if badPlan && exitCode < PlanFailExitCode {
+	planNOK := planLast > 0 && testnum != planLast
+	if planNOK && exitCode < PlanFailExitCode {
 		exitCode = PlanFailExitCode
 	}
 
@@ -214,20 +211,20 @@ func run(opts Options, ofh io.Writer) int {
 			if len(failures) > 1 {
 				plural = "s"
 			}
-			redb.Printf("FAILED test%s: %s\n",
+			cmap[SummaryNOK].Printf("FAILED test%s: %s\n",
 				plural,
 				failureString(failures))
-			redb.Printf("Failed %d/%d tests, %0.02f%% ok \u2717\n",
+			cmap[SummaryNOK].Printf("Failed %d/%d tests, %0.02f%% ok\n",
 				len(failures), testnum,
 				float64(testnum-len(failures))*100/float64(testnum))
-		} else if !badPlan {
-			greenb.Printf("Passed %d/%d tests, 100%% ok \u2713\n", testnum, testnum)
+		} else if !planNOK {
+			cmap[SummaryOK].Printf("Passed %d/%d tests, 100%% ok\n", testnum, testnum)
 		}
 	}
 
 	// Fail if we haven't seen all planned tests
-	if badPlan {
-		magentab.Printf("Failed plan: only %d/%d planned tests seen\n",
+	if planNOK {
+		cmap[PlanNOK].Printf("Failed plan: only %d/%d planned tests seen\n",
 			testnum, planLast)
 	}
 

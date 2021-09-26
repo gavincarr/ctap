@@ -1,6 +1,6 @@
 1..14
 #
-# Testing file test1.csv
+# Testing file test2.csv
 #
 ok
 ok 2

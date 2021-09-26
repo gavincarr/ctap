@@ -1,6 +1,6 @@
 [38;2;153;153;153m1..14[0m
 [38;2;102;102;102m#[0m
-[38;2;102;102;102m# Testing file test1.csv[0m
+[38;2;102;102;102m# Testing file test2.csv[0m
 [38;2;102;102;102m#[0m
 [32mok[0m
 [32mok 2[0m
@@ -21,5 +21,5 @@
 [32mok 13 - columns.j.fill_rate >= 80 (83.30)[0m
 [32mok 14 - columns.k.fill_rate >= 95 (96.03)[0m
 [31;1mFAILED tests: 5, 6
-[0m[31;1mFailed 2/14 tests, 85.71% ok ✗
+[0m[31;1mFailed 2/14 tests, 85.71% ok
 [0m
