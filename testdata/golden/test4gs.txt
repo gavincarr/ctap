@@ -1,0 +1,10 @@
+[38;2;153;153;153m1..14[0m
+[31;1m✗ - csv is NOT regular[0m
+[32m✓ - header is as expected[0m
+[32m✓ - row_count >= 100 (125)[0m
+[32m✓ - columns.a.fill_rate == 100[0m
+[32m✓ - columns.b.fill_rate >= 33 (34.33)[0m
+[31;1m✗ FAILED test: 1
+[0m[31;1m✗ Failed 1/5 tests, 80.00% ok
+[0m[35;1m✗ Failed plan: only 5/14 planned tests seen
+[0m

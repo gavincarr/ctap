@@ -1,0 +1,6 @@
+[38;2;153;153;153m1..14[0m
+[31;1m✗ 1 - csv is NOT regular[0m
+[31;1m✗ FAILED test: 1
+[0m[31;1m✗ Failed 1/6 tests, 83.33% ok
+[0m[35;1m✗ Failed plan: only 6/14 planned tests seen
+[0m

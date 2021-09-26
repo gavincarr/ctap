@@ -1,5 +1,5 @@
 /*
-ctap is a portable lightweight colouriser for TAP
+ctap is a lightweight, portable colouriser for TAP
 (Test-Anything-Protocol) output
 */
 package main
@@ -22,12 +22,16 @@ const (
 	TestFailExitCode = 3
 	PlanFailExitCode = 4
 	BailExitCode     = 5
+
+	GlyphOK  = "\u2713"
+	GlyphNOK = "\u2717"
 )
 
 type Options struct {
-	//Verbose bool `short:"v" long:"verbose" description:"display verbose debug output"`
-	Summary bool `short:"s" long:"summary" description:"append a summary of the test results after TAP output"`
-	Args    struct {
+	Failures bool `short:"f" long:"failures" description:"show test failures (suppress TAP successes)"`
+	Glyphs   bool `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output"`
+	Summary  bool `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results"`
+	Args     struct {
 		TapFile string
 	} `positional-args:"yes"`
 }
@@ -40,6 +44,8 @@ var (
 	reTest       = regexp.MustCompile(`^(ok|not ok)(?:\pZ+(\d+))?(?:\pZ+([^#]+))?(?:\pZ+(#\pZ*(.*?)))?\pZ*?$`)
 	reDiagnostic = regexp.MustCompile(`^#`)
 	reBail       = regexp.MustCompile(`^Bail out!(?:\pZ*(.*?))?\pZ*$`)
+
+	reTestPrefix = regexp.MustCompile(`^(ok|not ok)\pZ*`)
 )
 
 type LineType int
@@ -76,6 +82,7 @@ type ColourMap map[LineType]color.PrinterFace
 
 func colourMap(opt Options) ColourMap {
 	cmap := make(ColourMap)
+	cmap[Version] = color.New(color.FgCyan)
 	cmap[Plan] = color.HEX("#999999")
 	cmap[TestOK] = color.New(color.FgGreen)
 	cmap[TestNOK] = color.New(color.FgRed, color.OpBold)
@@ -144,6 +151,20 @@ func failureString(failures []int) string {
 }
 
 func cprintln(text string, linetype LineType, cmap ColourMap, opts Options) {
+	if opts.Failures && linetype == TestOK {
+		return
+	}
+	if opts.Glyphs {
+		// Replace `ok/not ok` (or prepend) glyphs
+		switch linetype {
+		case TestOK:
+			text = reTestPrefix.ReplaceAllString(text, GlyphOK+" ")
+		case TestNOK:
+			text = reTestPrefix.ReplaceAllString(text, GlyphNOK+" ")
+		case Bail:
+			text = GlyphNOK + " " + text
+		}
+	}
 	cmap[linetype].Println(text)
 }
 
@@ -205,27 +226,37 @@ func run(opts Options, ofh io.Writer) int {
 		exitCode = PlanFailExitCode
 	}
 
+	glyph := ""
+	if opts.Glyphs {
+		if planNOK || len(failures) > 0 {
+			glyph = GlyphNOK + " "
+		} else {
+			glyph = GlyphOK + " "
+		}
+	}
+
 	if opts.Summary {
 		if len(failures) > 0 {
 			plural := ""
 			if len(failures) > 1 {
 				plural = "s"
 			}
-			cmap[SummaryNOK].Printf("FAILED test%s: %s\n",
-				plural,
+			cmap[SummaryNOK].Printf("%sFAILED test%s: %s\n",
+				glyph, plural,
 				failureString(failures))
-			cmap[SummaryNOK].Printf("Failed %d/%d tests, %0.02f%% ok\n",
-				len(failures), testnum,
+			cmap[SummaryNOK].Printf("%sFailed %d/%d tests, %0.02f%% ok\n",
+				glyph, len(failures), testnum,
 				float64(testnum-len(failures))*100/float64(testnum))
 		} else if !planNOK {
-			cmap[SummaryOK].Printf("Passed %d/%d tests, 100%% ok\n", testnum, testnum)
+			cmap[SummaryOK].Printf("%sPassed %d/%d tests, 100%% ok\n",
+				glyph, testnum, testnum)
 		}
 	}
 
 	// Fail if we haven't seen all planned tests
 	if planNOK {
-		cmap[PlanNOK].Printf("Failed plan: only %d/%d planned tests seen\n",
-			testnum, planLast)
+		cmap[PlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
+			glyph, testnum, planLast)
 	}
 
 	return exitCode

@@ -22,7 +22,7 @@ Installation
 Binary packages are available from the
 [Releases page](https://github.com/gavincarr/ctap/releases/latest/).
 
-Or if you have go installed, you can do:
+Or if you have `go` installed, you can do:
 
     go install github.com/gavincarr/ctap@latest
 
@@ -31,10 +31,39 @@ or `$HOME/go/bin` directory (which you might need to add to your
 `$PATH`).
 
 
-Author and Licence
-------------------
+Usage
+-----
+
+    Usage:
+      ctap [OPTIONS] [TapFile]
+
+    Application Options:
+      -f, --failures  show test failures (suppress TAP successes)
+      -g, --glyphs    show ✓✗ glyphs instead of 'ok/not ok' in TAP output
+      -s, --summary   append a Test::Harness-like summary of the test results
+
+    Help Options:
+      -h, --help      Show this help message
+
+
+Todo
+----
+
+- add `-f` option to show failures (suppress successes from TAP output)
+- add `-g` option to use glyphs instead of 'ok/not ok' in TAP output
+- add options to specify custom colours (`-POFDB`)
+- add config file support for standard options/colours
+- add other renderers to transmute TAP output (e.g. 'dots') (?)
+
+
+Author
+------
 
 Copyright 2021 Gavin Carr <gavin@openfusion.com.au>.
+
+
+Licence
+--------
 
 ctap is available under the terms of the MIT Licence.
 
