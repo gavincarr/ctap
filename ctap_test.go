@@ -5,6 +5,8 @@ import (
 	"flag"
 	"io/ioutil"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -63,6 +65,8 @@ func TestBasic(t *testing.T) {
 		{"test5 -fgs", "test5.txt", "test5fgs.txt", 5, "fgs"},
 	}
 
+	reNL := regexp.MustCompile("\n")
+
 	for _, tc := range tests {
 		opts := options{}
 		if strings.Contains(tc.flags, "f") {
@@ -92,6 +96,10 @@ func TestBasic(t *testing.T) {
 		exp, err := ioutil.ReadFile(golden)
 		if err != nil {
 			t.Fatalf("%s: %s", err.Error(), string(exp))
+		}
+		if runtime.GOOS == "windows" {
+			// On Windows, munge our expected line endings
+			exp = reNL.ReplaceAll(exp, []byte("\r\n"))
 		}
 		if !bytes.Equal(got, exp) {
 			t.Errorf("test %q failed:\n%s\n", tc.name,
