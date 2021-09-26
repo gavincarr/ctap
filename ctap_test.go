@@ -65,7 +65,7 @@ func TestBasic(t *testing.T) {
 		{"test5 -fgs", "test5.txt", "test5fgs.txt", 5, "fgs"},
 	}
 
-	reNL := regexp.MustCompile("\n")
+	reNL := regexp.MustCompile("\r?\n")
 
 	for _, tc := range tests {
 		opts := options{}
@@ -98,13 +98,13 @@ func TestBasic(t *testing.T) {
 			t.Fatalf("%s: %s", err.Error(), string(exp))
 		}
 		if runtime.GOOS == "windows" {
-			// On Windows, munge our expected line endings
+			// On Windows, try munging our expected line endings
+			got = reNL.ReplaceAll(exp, []byte("\r\n"))
 			exp = reNL.ReplaceAll(exp, []byte("\r\n"))
 		}
 		if !bytes.Equal(got, exp) {
 			t.Errorf("test %q failed:\n%s\n", tc.name,
 				diff.Diff(string(exp), string(got)))
 		}
-
 	}
 }
