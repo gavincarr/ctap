@@ -168,6 +168,32 @@ func cprintln(text string, linetype lineType, cmap colourMap, opts options) {
 	cmap[linetype].Println(text)
 }
 
+func printSummary(failures []int, testnum int, planNOK bool, cmap colourMap, opts options) {
+	plural := ""
+	glyph := ""
+
+	if len(failures) > 0 {
+		if len(failures) > 1 {
+			plural = "s"
+		}
+		if opts.Glyphs {
+			glyph = glyphNOK + " "
+		}
+		cmap[tapSummaryNOK].Printf("%sFAILED test%s: %s\n",
+			glyph, plural,
+			failureString(failures))
+		cmap[tapSummaryNOK].Printf("%sFailed %d/%d tests, %0.02f%% ok\n",
+			glyph, len(failures), testnum,
+			float64(testnum-len(failures))*100/float64(testnum))
+	} else if !planNOK {
+		if opts.Glyphs {
+			glyph = glyphOK + " "
+		}
+		cmap[tapSummaryOK].Printf("%sPassed %d/%d tests, 100%% ok\n",
+			glyph, testnum, testnum)
+	}
+}
+
 func run(opts options, ofh io.Writer) int {
 	// Setup
 	log.SetFlags(0)
@@ -226,35 +252,16 @@ func run(opts options, ofh io.Writer) int {
 		exitCode = planFailExitCode
 	}
 
-	glyph := ""
-	if opts.Glyphs {
-		if planNOK || len(failures) > 0 {
-			glyph = glyphNOK + " "
-		} else {
-			glyph = glyphOK + " "
-		}
-	}
-
 	if opts.Summary {
-		if len(failures) > 0 {
-			plural := ""
-			if len(failures) > 1 {
-				plural = "s"
-			}
-			cmap[tapSummaryNOK].Printf("%sFAILED test%s: %s\n",
-				glyph, plural,
-				failureString(failures))
-			cmap[tapSummaryNOK].Printf("%sFailed %d/%d tests, %0.02f%% ok\n",
-				glyph, len(failures), testnum,
-				float64(testnum-len(failures))*100/float64(testnum))
-		} else if !planNOK {
-			cmap[tapSummaryOK].Printf("%sPassed %d/%d tests, 100%% ok\n",
-				glyph, testnum, testnum)
-		}
+		printSummary(failures, testnum, planNOK, cmap, opts)
 	}
 
 	// Fail if we haven't seen all planned tests
 	if planNOK {
+		glyph := ""
+		if opts.Glyphs {
+			glyph = glyphNOK + " "
+		}
 		cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
 			glyph, testnum, planLast)
 	}

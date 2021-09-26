@@ -95,7 +95,7 @@ func TestBasic(t *testing.T) {
 		}
 		if !bytes.Equal(got, exp) {
 			t.Errorf("test %q failed:\n%s\n", tc.name,
-				diff.Diff(string(got), string(exp)))
+				diff.Diff(string(exp), string(got)))
 		}
 
 	}
