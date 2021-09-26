@@ -194,6 +194,30 @@ func printSummary(failures []int, testnum int, planNOK bool, cmap colourMap, opt
 	}
 }
 
+func printAppends(failures []int, testnum, planLast, exitCode int,
+	cmap colourMap, opts options) int {
+	planNOK := planLast > 0 && testnum != planLast
+	if planNOK && exitCode < planFailExitCode {
+		exitCode = planFailExitCode
+	}
+
+	if opts.Summary {
+		printSummary(failures, testnum, planNOK, cmap, opts)
+	}
+
+	// Fail if we haven't seen all planned tests
+	if planNOK {
+		glyph := ""
+		if opts.Glyphs {
+			glyph = glyphNOK + " "
+		}
+		cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
+			glyph, testnum, planLast)
+	}
+
+	return exitCode
+}
+
 func run(opts options, ofh io.Writer) int {
 	// Setup
 	log.SetFlags(0)
@@ -247,24 +271,7 @@ func run(opts options, ofh io.Writer) int {
 		}
 	}
 
-	planNOK := planLast > 0 && testnum != planLast
-	if planNOK && exitCode < planFailExitCode {
-		exitCode = planFailExitCode
-	}
-
-	if opts.Summary {
-		printSummary(failures, testnum, planNOK, cmap, opts)
-	}
-
-	// Fail if we haven't seen all planned tests
-	if planNOK {
-		glyph := ""
-		if opts.Glyphs {
-			glyph = glyphNOK + " "
-		}
-		cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
-			glyph, testnum, planLast)
-	}
+	exitCode = printAppends(failures, testnum, planLast, exitCode, cmap, opts)
 
 	return exitCode
 }
