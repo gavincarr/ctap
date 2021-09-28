@@ -57,7 +57,24 @@ Todo
 - [x] add `-g` option to use glyphs instead of 'ok/not ok' in TAP output
 - [ ] add options to specify custom colours (`-POFDB`?)
 - [ ] add config file support for standard options/colours
+- [ ] add a `--save` option for setting config file standard options/colours
 - [ ] add other renderers to transmute TAP output (e.g. 'dots') (?)
+
+
+See Also
+--------
+
+- [Tap Colorize](https://www.npmjs.com/package/tap-colorize) - nice
+  javascript library and cli utility
+
+- [Tap Prettify](https://github.com/toolness/tap-prettify) - javascript
+  formatter with a focus on making TAP output useful (rather than colourful)
+
+- [Tap::Formatter::Color](https://metacpan.org/pod/TAP::Formatter::Color) -
+  the original perl TAP color formatter library
+
+- [Awesome TAP](https://github.com/sindresorhus/awesome-tap) - great general
+  list of TAP-related resources (esp. javascript-related)
 
 
 Author
