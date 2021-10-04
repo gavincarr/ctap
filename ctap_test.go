@@ -108,3 +108,58 @@ func TestBasic(t *testing.T) {
 		}
 	}
 }
+func TestCustomColours(t *testing.T) {
+	var tests = []struct {
+		name    string
+		infile  string
+		outfile string
+		opts    options
+	}{
+		{"test1", "test1.txt", "test1cc1.txt",
+			options{COk: "#339933", CFail: "bold c60",
+				CPlan: "yellow bold", CDiag: "#939"},
+		},
+		{"test2", "test2.txt", "test2cc1.txt",
+			options{COk: "#339933", CFail: "bold c60",
+				CPlan: "yellow bold", CDiag: "#939"},
+		},
+		{"test5", "test5.txt", "test5cc1.txt",
+			options{COk: "#339933", CFail: "bold c60",
+				CPlan: "yellow bold", CDiag: "#939",
+				CBail: "yellow bold reverse blink"},
+		},
+	}
+
+	reNL := regexp.MustCompile("\r?\n")
+
+	for _, tc := range tests {
+		opts := tc.opts
+		opts.Args.TapFile = filepath.Join("testdata", tc.infile)
+		buf := new(bytes.Buffer)
+
+		_ = run(opts, buf)
+		got := buf.Bytes()
+
+		golden := filepath.Join("testdata", "golden", tc.outfile)
+		if *update {
+			if err := ioutil.WriteFile(golden, got, 0644); err != nil {
+				t.Fatalf("failed to update golden file %q: %s\n", golden, err)
+			}
+			continue
+		}
+
+		exp, err := ioutil.ReadFile(golden)
+		if err != nil {
+			t.Fatalf("%s: %s", err.Error(), string(exp))
+		}
+		if runtime.GOOS == "windows" {
+			// For Windows tests, normalise line endings
+			got = reNL.ReplaceAll(exp, []byte("\n"))
+			exp = reNL.ReplaceAll(exp, []byte("\n"))
+		}
+		if !bytes.Equal(got, exp) {
+			t.Errorf("test %q failed:\n%s\n", tc.name,
+				diff.Diff(string(exp), string(got)))
+		}
+	}
+}

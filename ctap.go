@@ -25,12 +25,29 @@ const (
 
 	glyphOK  = "\u2713"
 	glyphNOK = "\u2717"
+
+	// Default colours
+	defaultCVersion  = "cyan"
+	defaultCPlan     = "#999999"
+	defaultCOk       = "green"
+	defaultCFail     = "red bold"
+	defaultCDiag     = "#666666"
+	defaultCBail     = "yellow bold"
+	defaultCSummOk   = "green bold"
+	defaultCSummFail = "red bold"
+	defaultCPlanFail = "magenta bold"
 )
 
 type options struct {
-	Failures bool `short:"f" long:"failures" description:"show test failures (suppress TAP successes)"`
-	Glyphs   bool `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output"`
-	Summary  bool `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results"`
+	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)"`
+	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output"`
+	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results"`
+	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines"`
+	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines"`
+	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines"`
+	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines"`
+	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines"`
+	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines"`
 	Args     struct {
 		TapFile string
 	} `positional-args:"yes"`
@@ -46,6 +63,29 @@ var (
 	reBail       = regexp.MustCompile(`^Bail out!(?:\pZ*(.*?))?\pZ*$`)
 
 	reTestPrefix = regexp.MustCompile(`^(ok|not ok)\pZ*`)
+
+	reHexColour = regexp.MustCompile(`(?i)^#?([0-9a-f]{6}|[0-9a-f]{3})$`)
+
+	colourStringMap = map[string]color.Color{
+		"white":   color.FgWhite,
+		"black":   color.FgBlack,
+		"gray":    color.FgGray,
+		"red":     color.FgRed,
+		"blue":    color.FgBlue,
+		"green":   color.FgGreen,
+		"yellow":  color.FgYellow,
+		"cyan":    color.FgCyan,
+		"magenta": color.FgMagenta,
+	}
+	colourOptMap = map[string]color.Color{
+		"bold":       color.OpBold,
+		"blink":      color.OpBlink,
+		"concealed":  color.OpConcealed,
+		"fuzzy":      color.OpFuzzy,
+		"italic":     color.OpItalic,
+		"reverse":    color.OpReverse,
+		"underscore": color.OpUnderscore,
+	}
 )
 
 type lineType int
@@ -78,19 +118,69 @@ type lineRecord struct {
 	Directive   string
 }
 
+func parseColour(c string) (color.PrinterFace, error) {
+	// Extract colour+options from c
+	var colourStr string
+	var options []color.Color
+	for _, t := range strings.Split(c, " ") {
+		o, ok := colourOptMap[t]
+		if ok {
+			options = append(options, o)
+			continue
+		}
+		// Error if more than one colour found
+		if colourStr != "" {
+			return nil, fmt.Errorf("multiple colours in string %q?", c)
+		}
+		colourStr = t
+	}
+
+	// Convert colour+options to a style
+	if reHexColour.MatchString(colourStr) {
+		style := color.HEXStyle(colourStr)
+		if len(options) > 0 {
+			style.AddOpts(options...)
+		}
+		return style, nil
+	}
+	colour, ok := colourStringMap[colourStr]
+	if !ok {
+		return nil, fmt.Errorf("bad colour string %q", colourStr)
+	}
+	if len(options) > 0 {
+		options = append([]color.Color{colour}, options...)
+		return color.New(options...), nil
+	}
+	return color.New(colour), nil
+}
+
+func getColour(defaultColour, optColour string) color.PrinterFace {
+	if optColour != "" {
+		c, err := parseColour(optColour)
+		if err == nil {
+			return c
+		}
+	}
+	c, err := parseColour(defaultColour)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c
+}
+
 type colourMap map[lineType]color.PrinterFace
 
 func getColourMap(opt options) colourMap {
 	cmap := make(colourMap)
-	cmap[tapVersion] = color.New(color.FgCyan)
-	cmap[tapPlan] = color.HEX("#999999")
-	cmap[tapTestOK] = color.New(color.FgGreen)
-	cmap[tapTestNOK] = color.New(color.FgRed, color.OpBold)
-	cmap[tapDiagnostic] = color.HEX("#666666")
-	cmap[tapBail] = color.New(color.FgYellow, color.OpBold)
-	cmap[tapSummaryOK] = color.New(color.FgGreen, color.OpBold)
-	cmap[tapSummaryNOK] = color.New(color.FgRed, color.OpBold)
-	cmap[tapPlanNOK] = color.New(color.FgMagenta, color.Bold)
+	cmap[tapVersion] = getColour(defaultCVersion, opt.CVersion)
+	cmap[tapPlan] = getColour(defaultCPlan, opt.CPlan)
+	cmap[tapTestOK] = getColour(defaultCOk, opt.COk)
+	cmap[tapTestNOK] = getColour(defaultCFail, opt.CFail)
+	cmap[tapDiagnostic] = getColour(defaultCDiag, opt.CDiag)
+	cmap[tapBail] = getColour(defaultCBail, opt.CBail)
+	cmap[tapSummaryOK] = getColour(defaultCSummOk, "")
+	cmap[tapSummaryNOK] = getColour(defaultCSummFail, "")
+	cmap[tapPlanNOK] = getColour(defaultCPlanFail, "")
 	return cmap
 }
 
