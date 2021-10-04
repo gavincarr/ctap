@@ -30,11 +30,13 @@ changelog:
 nfpms:
   - id: nfpms
     description: ctap is a lightweight, portable TAP-output colouriser
+    homepage: https://github.com/gavincarr/ctap
     maintainer: Gavin Carr <gavin@openfusion.com.au>
     license: MIT
     formats: 
       - deb
       - rpm
+    bindir: /usr/bin
     file_name_template: '{{ .ProjectName }}_{{ replace .Version "v" "" }}_{{ .Arch }}'  
     overrides:
       rpm:
