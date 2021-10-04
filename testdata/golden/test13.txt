@@ -1,0 +1,19 @@
+[36mTAP version 13[0m
+[38;2;153;153;153m1..48[0m
+[32mok 1 Description # Directive[0m
+[38;2;102;102;102m# Diagnostic[0m
+[39m  ---[0m
+[39m  message: 'Failure message'[0m
+[39m  severity: fail[0m
+[39m  data:[0m
+[39m    got:[0m
+[39m      - 1[0m
+[39m      - 3[0m
+[39m      - 2[0m
+[39m    expect:[0m
+[39m      - 1[0m
+[39m      - 2[0m
+[39m      - 3[0m
+[39m  ...[0m
+[32mok 47 Description[0m
+[32mok 48 Description[0m

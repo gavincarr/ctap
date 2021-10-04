@@ -63,6 +63,9 @@ func TestBasic(t *testing.T) {
 		{"test3 -fgs", "test3.txt", "test3fgs.txt", 4, "fgs"},
 		{"test4 -fgs", "test4.txt", "test4fgs.txt", 4, "fgs"},
 		{"test5 -fgs", "test5.txt", "test5fgs.txt", 5, "fgs"},
+		// Version 13
+		{"test13", "test13.txt", "test13.txt", 0, ""},
+		{"test14", "test14.txt", "test14.txt", 3, ""},
 	}
 
 	reNL := regexp.MustCompile("\r?\n")

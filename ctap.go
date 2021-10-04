@@ -27,6 +27,7 @@ const (
 	glyphNOK = "\u2717"
 
 	// Default colours
+	defaultCUnknown  = "default"
 	defaultCVersion  = "cyan"
 	defaultCPlan     = "#999999"
 	defaultCOk       = "green"
@@ -67,6 +68,7 @@ var (
 	reHexColour = regexp.MustCompile(`(?i)^#?([0-9a-f]{6}|[0-9a-f]{3})$`)
 
 	colourStringMap = map[string]color.Color{
+		"default": color.FgDefault,
 		"white":   color.FgWhite,
 		"black":   color.FgBlack,
 		"gray":    color.FgGray,
@@ -172,6 +174,7 @@ type colourMap map[lineType]color.PrinterFace
 
 func getColourMap(opt options) colourMap {
 	cmap := make(colourMap)
+	cmap[tapUnknown] = getColour(defaultCUnknown, "")
 	cmap[tapVersion] = getColour(defaultCVersion, opt.CVersion)
 	cmap[tapPlan] = getColour(defaultCPlan, opt.CPlan)
 	cmap[tapTestOK] = getColour(defaultCOk, opt.COk)
@@ -255,7 +258,12 @@ func cprintln(text string, linetype lineType, cmap colourMap, opts options) {
 			text = glyphNOK + " " + text
 		}
 	}
-	cmap[linetype].Println(text)
+	cfmt, ok := cmap[linetype]
+	if !ok {
+		log.Fatalf("no formatter defined for linetype %q: %s\n",
+			linetype.String(), text)
+	}
+	cfmt.Println(text)
 }
 
 func printSummary(failures []int, testnum int, planNOK bool, cmap colourMap, opts options) {

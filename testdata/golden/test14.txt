@@ -1,0 +1,17 @@
+[36mTAP version 13[0m
+[38;2;153;153;153m1..4[0m
+[32mok 1 - Input file opened[0m
+[31;1mnot ok 2 - First line of the input valid[0m
+[39m  ---[0m
+[39m  message: 'First line invalid'[0m
+[39m  severity: fail[0m
+[39m  data:[0m
+[39m    got: 'Flirble'[0m
+[39m    expect: 'Fnible'[0m
+[39m  ...[0m
+[32mok 3 - Read the rest of the file[0m
+[31;1mnot ok 4 - Summarized correctly # TODO Not written yet[0m
+[39m  ---[0m
+[39m  message: "Can't make summary yet"[0m
+[39m  severity: todo[0m
+[39m  ...[0m
