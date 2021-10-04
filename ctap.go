@@ -37,6 +37,23 @@ const (
 	defaultCSummOk   = "green bold"
 	defaultCSummFail = "red bold"
 	defaultCPlanFail = "magenta bold"
+
+	// Usage addendum
+	usageAddendum = `
+Colour strings may be any of the following colour names:
+
+  red, green, blue, yellow, cyan, magenta, white, black, gray, default
+
+They may also be hex colour strings like "#cc9900" or "#c90" (with the
+leading "#" optional).
+
+Colour names or hex strings can also have any of the following modifiers
+appended to them (space-separated):
+
+  bold, italic, underscore, reverse, blink, concealed, fuzzy
+
+(though how they work will depend on your terminal support)
+`
 )
 
 type options struct {
@@ -68,25 +85,25 @@ var (
 	reHexColour = regexp.MustCompile(`(?i)^#?([0-9a-f]{6}|[0-9a-f]{3})$`)
 
 	colourStringMap = map[string]color.Color{
-		"default": color.FgDefault,
-		"white":   color.FgWhite,
-		"black":   color.FgBlack,
-		"gray":    color.FgGray,
 		"red":     color.FgRed,
 		"blue":    color.FgBlue,
 		"green":   color.FgGreen,
 		"yellow":  color.FgYellow,
 		"cyan":    color.FgCyan,
 		"magenta": color.FgMagenta,
+		"white":   color.FgWhite,
+		"black":   color.FgBlack,
+		"gray":    color.FgGray,
+		"default": color.FgDefault,
 	}
 	colourOptMap = map[string]color.Color{
 		"bold":       color.OpBold,
+		"italic":     color.OpItalic,
+		"underscore": color.OpUnderscore,
 		"blink":      color.OpBlink,
 		"concealed":  color.OpConcealed,
 		"fuzzy":      color.OpFuzzy,
-		"italic":     color.OpItalic,
 		"reverse":    color.OpReverse,
-		"underscore": color.OpUnderscore,
 	}
 )
 
@@ -383,8 +400,8 @@ func main() {
 	parser := flags.NewParser(&opts, flags.Default)
 	_, err := parser.Parse()
 	if err != nil {
-		ferr := err.(*flags.Error)
-		if ferr.Type == flags.ErrHelp {
+		if flags.WroteHelp(err) {
+			fmt.Println(usageAddendum)
 			os.Exit(0)
 		}
 

@@ -45,9 +45,31 @@ Usage
       -f, --failures  show test failures (suppress TAP successes)
       -g, --glyphs    show ✓✗ glyphs instead of 'ok/not ok' in TAP output
       -s, --summary   append a Test::Harness-like summary of the test results
+      -V, --cversion= colour to use for version lines
+      -P, --cplan=    colour to use for plan lines
+      -O, --cok=      colour to use for test ok lines
+      -F, --cfail=    colour to use for test fail/not ok lines
+      -D, --cdiag=    colour to use for diagnostic lines
+      -B, --cbail=    colour to use for bail out lines
 
     Help Options:
       -h, --help      Show this help message
+
+
+    Colour strings may be any of the following colour names:
+
+      red, green, blue, yellow, cyan, magenta, white, black, gray, default
+
+    They may also be hex colour strings like "#cc9900" or "#c90" (with the
+    leading "#" optional).
+
+    Colour names or hex strings can also have any of the following modifiers
+    appended to them (space-separated):
+
+      bold, italic, underscore, reverse, blink, concealed, fuzzy
+
+    (though how they work will depend on your terminal support)
+
 
 
 Todo
@@ -55,7 +77,7 @@ Todo
 
 - [x] add `-f` option to show failures (suppress successes from TAP output)
 - [x] add `-g` option to use glyphs instead of 'ok/not ok' in TAP output
-- [ ] add options to specify custom colours (`-POFDB`?)
+- [x] add options to specify custom colours (`-VPOFDB`?)
 - [ ] add config file support for standard options/colours
 - [ ] add a `--save` option for setting config file standard options/colours
 - [ ] add other renderers to transmute TAP output (e.g. 'dots') (?)
