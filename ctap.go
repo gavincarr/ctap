@@ -311,7 +311,7 @@ func printSummary(failures []int, testnum int, planNOK bool, cmap colourMap, opt
 
 func printAppends(failures []int, testnum, planLast, exitCode int,
 	cmap colourMap, opts options) int {
-	planNOK := planLast > 0 && testnum != planLast
+	planNOK := testnum == 0 || testnum != planLast
 	if planNOK && exitCode < planFailExitCode {
 		exitCode = planFailExitCode
 	}
@@ -326,8 +326,12 @@ func printAppends(failures []int, testnum, planLast, exitCode int,
 		if opts.Glyphs {
 			glyph = glyphNOK + " "
 		}
-		cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
-			glyph, testnum, planLast)
+		if testnum == 0 {
+			cmap[tapPlanNOK].Printf("%sFailed plan: no tests seen\n", glyph)
+		} else {
+			cmap[tapPlanNOK].Printf("%sFailed plan: only %d/%d planned tests seen\n",
+				glyph, testnum, planLast)
+		}
 	}
 
 	return exitCode
