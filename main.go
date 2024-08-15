@@ -57,21 +57,19 @@ appended to them (space-separated):
 )
 
 type options struct {
-	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)"`
-	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output"`
-	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results"`
-	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines"`
-	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines"`
-	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines"`
-	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines"`
-	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines"`
-	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines"`
+	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
+	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
+	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results" env:"CTAP_SUMMARY"`
+	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines" env:"CTAP_CVERSION"`
+	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines" env:"CTAP_CPLAN"`
+	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines" env:"CTAP_COK"`
+	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines" env:"CTAP_CFAIL"`
+	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines" env:"CTAP_CDIAG"`
+	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines" env:"CTAP_CBAIL"`
 	Args     struct {
 		TapFile string
 	} `positional-args:"yes"`
 }
-
-var opts options
 
 var (
 	reVersion    = regexp.MustCompile(`^TAP version (\d+)`)
@@ -401,6 +399,7 @@ func runCLI(opts options, ofh io.Writer) int {
 
 func main() {
 	// Parse default options are HelpFlag | PrintErrors | PassDoubleDash
+	var opts options
 	parser := flags.NewParser(&opts, flags.Default)
 	_, err := parser.Parse()
 	if err != nil {
