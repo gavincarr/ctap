@@ -20,16 +20,19 @@ import (
 )
 
 type options struct {
-	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
-	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
-	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results" env:"CTAP_SUMMARY"`
-	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines" env:"CTAP_CVERSION" default:"cyan"`
-	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines" env:"CTAP_CPLAN" default:"white"`
-	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines" env:"CTAP_COK" default:"green"`
-	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines" env:"CTAP_CFAIL" default:"red bold"`
-	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines" env:"CTAP_CDIAG" default:"gray"`
-	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines" env:"CTAP_CBAIL" default:"yellow bold"`
-	Args     struct {
+	Failures  bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
+	Glyphs    bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
+	Summary   bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results" env:"CTAP_SUMMARY"`
+	CVersion  string `short:"V" long:"cversion" description:"colour to use for version lines" env:"CTAP_CVERSION" default:"cyan"`
+	CPlan     string `short:"P" long:"cplan" description:"colour to use for plan lines" env:"CTAP_CPLAN" default:"white"`
+	COk       string `short:"O" long:"cok" description:"colour to use for test ok lines" env:"CTAP_COK" default:"green"`
+	CFail     string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines" env:"CTAP_CFAIL" default:"red bold"`
+	CDiag     string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines" env:"CTAP_CDIAG" default:"gray"`
+	CBail     string `short:"B" long:"cbail" description:"colour to use for bail out lines" env:"CTAP_CBAIL" default:"yellow bold"`
+	CSummOk   string `long:"csummok" description:"colour to use for summary lines when all tests pass" env:"CTAP_CSUMMOK" default:"green bold"`
+	CSummFail string `long:"csummfail" description:"colour to use for summary lines when some tests fail" env:"CTAP_CSUMMFAIL" default:"red bold"`
+	CPlanFail string `long:"cplanfail" description:"colour to use for plan failure lines" env:"CTAP_CPLANFAIL" default:"magenta bold"`
+	Args      struct {
 		TapFile string
 	} `positional-args:"yes"`
 }
@@ -197,45 +200,45 @@ func setColour(
 
 type colourMap map[lineType]color.PrinterFace
 
-func getColourMap(opt options) (colourMap, error) {
+func getColourMap(opts options) (colourMap, error) {
 	cmap := make(colourMap)
 	err := setColour(&cmap, tapUnknown, "", defaultCUnknown)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapVersion, opt.CVersion, defaultCVersion)
+	err = setColour(&cmap, tapVersion, opts.CVersion, defaultCVersion)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapPlan, opt.CPlan, defaultCPlan)
+	err = setColour(&cmap, tapPlan, opts.CPlan, defaultCPlan)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapTestOK, opt.COk, defaultCOk)
+	err = setColour(&cmap, tapTestOK, opts.COk, defaultCOk)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapTestNOK, opt.CFail, defaultCFail)
+	err = setColour(&cmap, tapTestNOK, opts.CFail, defaultCFail)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapDiagnostic, opt.CDiag, defaultCDiag)
+	err = setColour(&cmap, tapDiagnostic, opts.CDiag, defaultCDiag)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapBail, opt.CBail, defaultCBail)
+	err = setColour(&cmap, tapBail, opts.CBail, defaultCBail)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapSummaryOK, "", defaultCSummOk)
+	err = setColour(&cmap, tapSummaryOK, opts.CSummOk, defaultCSummOk)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapSummaryNOK, "", defaultCSummFail)
+	err = setColour(&cmap, tapSummaryNOK, opts.CSummFail, defaultCSummFail)
 	if err != nil {
 		return nil, err
 	}
-	err = setColour(&cmap, tapPlanNOK, "", defaultCPlanFail)
+	err = setColour(&cmap, tapPlanNOK, opts.CPlanFail, defaultCPlanFail)
 	if err != nil {
 		return nil, err
 	}
