@@ -6,6 +6,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,7 +19,23 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
+type options struct {
+	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
+	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
+	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results" env:"CTAP_SUMMARY"`
+	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines" env:"CTAP_CVERSION" default:"cyan"`
+	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines" env:"CTAP_CPLAN" default:"white"`
+	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines" env:"CTAP_COK" default:"green"`
+	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines" env:"CTAP_CFAIL" default:"red bold"`
+	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines" env:"CTAP_CDIAG" default:"gray"`
+	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines" env:"CTAP_CBAIL" default:"yellow bold"`
+	Args     struct {
+		TapFile string
+	} `positional-args:"yes"`
+}
+
 const (
+	usageExitCode    = 2
 	testFailExitCode = 3
 	planFailExitCode = 4
 	bailExitCode     = 5
@@ -55,21 +72,6 @@ appended to them (space-separated):
 (though how they work will depend on your terminal support)
 `
 )
-
-type options struct {
-	Failures bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
-	Glyphs   bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
-	Summary  bool   `short:"s" long:"summary" description:"append a Test::Harness-like summary of the test results" env:"CTAP_SUMMARY"`
-	CVersion string `short:"V" long:"cversion" description:"colour to use for version lines" env:"CTAP_CVERSION"`
-	CPlan    string `short:"P" long:"cplan" description:"colour to use for plan lines" env:"CTAP_CPLAN"`
-	COk      string `short:"O" long:"cok" description:"colour to use for test ok lines" env:"CTAP_COK"`
-	CFail    string `short:"F" long:"cfail" description:"colour to use for test fail/not ok lines" env:"CTAP_CFAIL"`
-	CDiag    string `short:"D" long:"cdiag" description:"colour to use for diagnostic lines" env:"CTAP_CDIAG"`
-	CBail    string `short:"B" long:"cbail" description:"colour to use for bail out lines" env:"CTAP_CBAIL"`
-	Args     struct {
-		TapFile string
-	} `positional-args:"yes"`
-}
 
 var (
 	reVersion    = regexp.MustCompile(`^TAP version (\d+)`)
@@ -171,35 +173,73 @@ func parseColour(c string) (color.PrinterFace, error) {
 	return color.New(colour), nil
 }
 
-func getColour(defaultColour, optColour string) color.PrinterFace {
-	if optColour != "" {
-		c, err := parseColour(optColour)
-		if err == nil {
-			return c
-		}
+func setColour(
+	cmap *colourMap,
+	lt lineType,
+	colourString, defaultString string,
+) error {
+	if defaultString == "" {
+		return errors.New("empty colour default string")
 	}
-	c, err := parseColour(defaultColour)
+	if colourString == "" {
+		colourString = defaultString
+	}
+
+	c, err := parseColour(colourString)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	return c
+
+	(*cmap)[lt] = c
+
+	return nil
 }
 
 type colourMap map[lineType]color.PrinterFace
 
-func getColourMap(opt options) colourMap {
+func getColourMap(opt options) (colourMap, error) {
 	cmap := make(colourMap)
-	cmap[tapUnknown] = getColour(defaultCUnknown, "")
-	cmap[tapVersion] = getColour(defaultCVersion, opt.CVersion)
-	cmap[tapPlan] = getColour(defaultCPlan, opt.CPlan)
-	cmap[tapTestOK] = getColour(defaultCOk, opt.COk)
-	cmap[tapTestNOK] = getColour(defaultCFail, opt.CFail)
-	cmap[tapDiagnostic] = getColour(defaultCDiag, opt.CDiag)
-	cmap[tapBail] = getColour(defaultCBail, opt.CBail)
-	cmap[tapSummaryOK] = getColour(defaultCSummOk, "")
-	cmap[tapSummaryNOK] = getColour(defaultCSummFail, "")
-	cmap[tapPlanNOK] = getColour(defaultCPlanFail, "")
-	return cmap
+	err := setColour(&cmap, tapUnknown, "", defaultCUnknown)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapVersion, opt.CVersion, defaultCVersion)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapPlan, opt.CPlan, defaultCPlan)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapTestOK, opt.COk, defaultCOk)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapTestNOK, opt.CFail, defaultCFail)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapDiagnostic, opt.CDiag, defaultCDiag)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapBail, opt.CBail, defaultCBail)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapSummaryOK, "", defaultCSummOk)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapSummaryNOK, "", defaultCSummFail)
+	if err != nil {
+		return nil, err
+	}
+	err = setColour(&cmap, tapPlanNOK, "", defaultCPlanFail)
+	if err != nil {
+		return nil, err
+	}
+	return cmap, nil
 }
 
 func parseLine(text string) lineRecord {
@@ -335,7 +375,7 @@ func printAppends(failures []int, testnum, planLast, exitCode int,
 	return exitCode
 }
 
-func runCLI(opts options, ofh io.Writer) int {
+func runCLI(opts options, ofh io.Writer) (int, error) {
 	// Setup
 	log.SetFlags(0)
 	var fh *os.File
@@ -357,7 +397,10 @@ func runCLI(opts options, ofh io.Writer) int {
 	if _, ok := os.LookupEnv("CI"); ok {
 		color.ForceOpenColor()
 	}
-	cmap := getColourMap(opts)
+	cmap, err := getColourMap(opts)
+	if err != nil {
+		return usageExitCode, err
+	}
 
 	// Process input
 	var planLast int
@@ -394,7 +437,7 @@ func runCLI(opts options, ofh io.Writer) int {
 
 	exitCode = printAppends(failures, testnum, planLast, exitCode, cmap, opts)
 
-	return exitCode
+	return exitCode, nil
 }
 
 func main() {
@@ -411,11 +454,12 @@ func main() {
 		// Does PrintErrors work? Is it not set?
 		fmt.Fprintln(os.Stderr, "")
 		parser.WriteHelp(os.Stderr)
-		os.Exit(2)
+		os.Exit(usageExitCode)
 	}
 
-	exitCode := runCLI(opts, os.Stdout)
-	if exitCode != 0 {
-		os.Exit(exitCode)
+	code, err := runCLI(opts, os.Stdout)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error: "+err.Error())
 	}
+	os.Exit(code)
 }

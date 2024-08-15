@@ -86,9 +86,12 @@ func TestBasic(t *testing.T) {
 		opts.Args.TapFile = filepath.Join("testdata", tc.infile)
 		buf := new(bytes.Buffer)
 
-		ec := runCLI(opts, buf)
+		code, err := runCLI(opts, buf)
+		if err != nil {
+			t.Error(err)
+		}
 		got := buf.Bytes()
-		assert.Equal(t, tc.exitCode, ec, tc.name+" exitCode")
+		assert.Equal(t, tc.exitCode, code, tc.name+" exitCode")
 
 		golden := filepath.Join("testdata", "golden", tc.outfile)
 		if *update {
@@ -113,6 +116,7 @@ func TestBasic(t *testing.T) {
 		}
 	}
 }
+
 func TestCustomColours(t *testing.T) {
 	var tests = []struct {
 		name    string
@@ -142,12 +146,15 @@ func TestCustomColours(t *testing.T) {
 		opts.Args.TapFile = filepath.Join("testdata", tc.infile)
 		buf := new(bytes.Buffer)
 
-		_ = runCLI(opts, buf)
+		_, err := runCLI(opts, buf)
+		if err != nil {
+			t.Error(err)
+		}
 		got := buf.Bytes()
 
 		golden := filepath.Join("testdata", "golden", tc.outfile)
 		if *update {
-			if err := ioutil.WriteFile(golden, got, 0644); err != nil {
+			if err = ioutil.WriteFile(golden, got, 0644); err != nil {
 				t.Fatalf("failed to update golden file %q: %s\n", golden, err)
 			}
 			continue
