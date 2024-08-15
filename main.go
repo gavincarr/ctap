@@ -29,10 +29,10 @@ const (
 	// Default colours
 	defaultCUnknown  = "default"
 	defaultCVersion  = "cyan"
-	defaultCPlan     = "#999999"
+	defaultCPlan     = "white"
 	defaultCOk       = "green"
 	defaultCFail     = "red bold"
-	defaultCDiag     = "#666666"
+	defaultCDiag     = "gray"
 	defaultCBail     = "yellow bold"
 	defaultCSummOk   = "green bold"
 	defaultCSummFail = "red bold"
@@ -337,7 +337,7 @@ func printAppends(failures []int, testnum, planLast, exitCode int,
 	return exitCode
 }
 
-func run(opts options, ofh io.Writer) int {
+func runCLI(opts options, ofh io.Writer) int {
 	// Setup
 	log.SetFlags(0)
 	var fh *os.File
@@ -405,7 +405,7 @@ func main() {
 	_, err := parser.Parse()
 	if err != nil {
 		if flags.WroteHelp(err) {
-			fmt.Println(usageAddendum)
+			fmt.Print(usageAddendum)
 			os.Exit(0)
 		}
 
@@ -415,7 +415,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	exitCode := run(opts, os.Stdout)
+	exitCode := runCLI(opts, os.Stdout)
 	if exitCode != 0 {
 		os.Exit(exitCode)
 	}

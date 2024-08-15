@@ -1,4 +1,4 @@
-[38;2;153;153;153m1..14[0m
+[37m1..14[0m
 [31;1m✗ - csv is NOT regular[0m
 [32m✓ - header is as expected[0m
 [32m✓ - row_count >= 100 (125)[0m

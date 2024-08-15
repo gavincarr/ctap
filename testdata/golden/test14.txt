@@ -1,5 +1,5 @@
 [36mTAP version 13[0m
-[38;2;153;153;153m1..4[0m
+[37m1..4[0m
 [32mok 1 - Input file opened[0m
 [31;1mnot ok 2 - First line of the input valid[0m
 [39m  ---[0m

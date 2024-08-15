@@ -86,7 +86,7 @@ func TestBasic(t *testing.T) {
 		opts.Args.TapFile = filepath.Join("testdata", tc.infile)
 		buf := new(bytes.Buffer)
 
-		ec := run(opts, buf)
+		ec := runCLI(opts, buf)
 		got := buf.Bytes()
 		assert.Equal(t, tc.exitCode, ec, tc.name+" exitCode")
 
@@ -142,7 +142,7 @@ func TestCustomColours(t *testing.T) {
 		opts.Args.TapFile = filepath.Join("testdata", tc.infile)
 		buf := new(bytes.Buffer)
 
-		_ = run(opts, buf)
+		_ = runCLI(opts, buf)
 		got := buf.Bytes()
 
 		golden := filepath.Join("testdata", "golden", tc.outfile)

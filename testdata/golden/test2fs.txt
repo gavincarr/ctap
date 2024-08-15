@@ -1,13 +1,13 @@
-[38;2;153;153;153m1..14[0m
-[38;2;102;102;102m#[0m
-[38;2;102;102;102m# Testing file test2.csv[0m
-[38;2;102;102;102m#[0m
+[37m1..14[0m
+[90m#[0m
+[90m# Testing file test2.csv[0m
+[90m#[0m
 [31;1mnot ok 5 - columns.b.fill_rate >= 35 (34.33)[0m
-[38;2;102;102;102m#   Failed test 'columns.b.fill_rate >= 35 (34.33)'[0m
-[38;2;102;102;102m#   at /usr/bin/bin/csv_check line 132.[0m
+[90m#   Failed test 'columns.b.fill_rate >= 35 (34.33)'[0m
+[90m#   at /usr/bin/bin/csv_check line 132.[0m
 [31;1mnot ok 6 - columns.c.fill_rate >= 80 (75.73)[0m
-[38;2;102;102;102m#   Failed test 'columns.c.fill_rate >= 80 (75.73)'[0m
-[38;2;102;102;102m#   at /usr/bin/csv_check line 132.[0m
+[90m#   Failed test 'columns.c.fill_rate >= 80 (75.73)'[0m
+[90m#   at /usr/bin/csv_check line 132.[0m
 [31;1mFAILED tests: 5, 6
 [0m[31;1mFailed 2/14 tests, 85.71% ok
 [0m

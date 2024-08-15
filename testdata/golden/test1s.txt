@@ -12,6 +12,6 @@
 [32mok 12 - columns.i.fill_rate >= 98 (99.37)[0m
 [32mok 13 - columns.j.fill_rate >= 80 (83.30)[0m
 [32mok 14 - columns.k.fill_rate >= 95 (96.03)[0m
-[38;2;153;153;153m1..14[0m
+[37m1..14[0m
 [32;1mPassed 14/14 tests, 100% ok
 [0m

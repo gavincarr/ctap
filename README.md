@@ -102,7 +102,7 @@ See Also
 Author
 ------
 
-Copyright 2021 Gavin Carr <gavin@openfusion.com.au>.
+Copyright 2021 Gavin Carr <gavin@openfusion.net>.
 
 
 Licence
