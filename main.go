@@ -19,6 +19,8 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
+var version = "undefined"
+
 type options struct {
 	Failures  bool   `short:"f" long:"failures" description:"show test failures (suppress TAP successes)" env:"CTAP_FAILURES"`
 	Glyphs    bool   `short:"g" long:"glyphs" description:"show \u2713\u2717 glyphs instead of 'ok/not ok' in TAP output" env:"CTAP_GLYPHS"`
@@ -32,6 +34,7 @@ type options struct {
 	CSummOk   string `long:"csummok" description:"colour to use for summary lines when all tests pass" env:"CTAP_CSUMMOK" default:"green bold"`
 	CSummFail string `long:"csummfail" description:"colour to use for summary lines when some tests fail" env:"CTAP_CSUMMFAIL" default:"red bold"`
 	CPlanFail string `long:"cplanfail" description:"colour to use for plan failure lines" env:"CTAP_CPLANFAIL" default:"magenta bold"`
+	Version   bool   `long:"version" description:"output version information"`
 	Args      struct {
 		TapFile string
 	} `positional-args:"yes"`
@@ -380,6 +383,10 @@ func printAppends(failures []int, testnum, planLast, exitCode int,
 
 func runCLI(opts options, ofh io.Writer) (int, error) {
 	// Setup
+	if opts.Version {
+		fmt.Println(version)
+		return 0, nil
+	}
 	log.SetFlags(0)
 	var fh *os.File
 	var err error
