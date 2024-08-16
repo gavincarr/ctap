@@ -1,3 +1,2 @@
-[37m0..0[0m
 [35;1mFailed plan: no tests seen
 [0m

@@ -68,6 +68,7 @@ func TestBasic(t *testing.T) {
 		{"test14", "test14.txt", "test14.txt", 3, ""},
 		// Empty
 		{"test0", "test0.txt", "test0.txt", 4, ""},
+		{"empty", "empty.txt", "empty.txt", 4, ""},
 	}
 
 	reNL := regexp.MustCompile("\r?\n")
